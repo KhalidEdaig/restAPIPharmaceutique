@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -35,19 +36,36 @@ public class ProductController {
 	public List<Product> retrieveAllProducts() {
 		return productRepository.findAll();
 	}
-	// method to expose the details of a specific product by code.
-	@GetMapping("/products/{code}")
-	public Product retrieveProdectByCode(@PathVariable String code) {
-		Optional<Product> product = productRepository.findByCodeContaining(code);
+	// method to expose the details of a specific product by id.
+	@GetMapping("/products/{id}")
+	public Product retrieveProdectById(@PathVariable Long id) {
+		Optional<Product> productOptional = productRepository.findById(id);
 		//Exception if not exist	
-		return product.get();
+		return productOptional.get();
+	}
+	// method to expose the details of a specific product by code.
+	@GetMapping("/products/searchbycode/{code}")
+	public Product retrieveProdectByCode(@PathVariable String code) {
+		Product product = productRepository.findByCodeContaining(code);
+		//Exception if not exist	
+		return product;
 	}
 	// method to expose the details of a specific product by nom
-	@GetMapping("/products/{name}")
+	@GetMapping("/products/searchbyname/{name}")
 	public Product retrieveProdectByName(@PathVariable String name) {
-		Optional<Product> product = productRepository.findByNomContaining(name);
+		Product product = productRepository.findByNomContaining(name);
 		//Exception if not exist	
-		return product.get();
+		return product;
+	}
+	@PutMapping("/products/{id}")
+	public ResponseEntity<Object> updateStudent(@RequestBody Product product, @PathVariable long id) {
+		Optional<Product> productOptional = productRepository.findById(id);
+		if (!productOptional.isPresent())
+			return ResponseEntity.notFound().build();
+		product.setId(id);
+		productRepository.save(product);
+
+		return ResponseEntity.noContent().build();
 	}
 	//Delete method is simple
 	@DeleteMapping("/products/{id}")
